@@ -2,7 +2,7 @@ from Request import Request
 
 def getPointForId(cursor, id):
     cursor.execute("SELECT x,y FROM point WHERE id = '{}'".format(id))
-    return cursor.fetchone()
+    return cursor.fetchone()[0]
 
 def getOrganization(cursor, id, nameOrg, curOutputData):
     cursor.execute("SELECT pointId,idStreet FROM building WHERE id = '{}'".format(id))
@@ -12,11 +12,14 @@ def getOrganization(cursor, id, nameOrg, curOutputData):
     pt = getPointForId(cursor, nms[0])
 
     if pt is not None:
-        curOutputData.point.x = pt[0]
-        curOutputData.point.y = pt[1]
+        curOutputData.points = pt[0]
         curOutputData.name = nameOrg
         cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(nms[1]))
         curOutputData.street = cursor.fetchone()
+
+class Organization:
+    name = ""
+    address = ""
 
 class GetResult(Request):
 
@@ -36,7 +39,7 @@ class GetResult(Request):
         numstreet = 0
 
         for i, curChr in enumerate(request):
-            if curChr >= '0'  and curChr <='9':
+            if curChr >= '0' and curChr <='9':
                 check = 0
                 street = request[:i-1]
                 numstreet = request[i:]
@@ -44,25 +47,27 @@ class GetResult(Request):
 
         if check:
             # Поиск точек по названию улицы
-            cursor.execute("SELECT pointId FROM Street WHERE login = '{}'".format(request))
+            cursor.execute("SELECT pointId FROM Street WHERE name = '{}'".format(request))
 
-            pt = getPointForId(cursor, cursor.fetchone())
+            pt = getPointForId(cursor, cursor.fetchone()[0])
+
+            dataTransferObject.points = []
 
             if pt is not None:
-                dataTransferObject.Street.point.x = pt[0]
-                dataTransferObject.Street.point.y = pt[1]
+                dataTransferObject.points.append(pt)
 
             # Поиск точек по названию компаниии
             cursor.execute("SELECT idBuilding FROM Organization WHERE name = '{}'".format(request))
 
-            id = cursor.fetchone()
+            id = cursor.fetchone()[0]
+            if id is not None:
+                getOrganization(cursor, id, request, dataTransferObject)
 
-            getOrganization(cursor, id, request, dataTransferObject.organization)
 
             # Поиск домов по названию типа компании
             cursor.execute("SELECT id FROM typeOrganization WHERE name = '{}'".format(request))
 
-            id = cursor.fetchone()
+            id = cursor.fetchone()[0]
 
             cursor.execute("SELECT idBuilding, name FROM Organization WHERE idType = '{}'".format(id))
 
@@ -83,7 +88,7 @@ class GetResult(Request):
                     dataTransferObject.typeOrganization.point[cntBuild].y = pt[1]
                     dataTransferObject.typeOrganization.name[cntBuild] = curBuild[1]
                     cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(nms[1]))
-                    dataTransferObject.typeOrganization.street = cursor.fetchone()
+                    dataTransferObject.typeOrganization.street = cursor.fetchone()[0]
                     cntBuild += 1
 
             dataTransferObject.typeOrganization.cntBuild = cntBuild
