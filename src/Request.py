@@ -1,6 +1,7 @@
 import pyodbc
 import json
 from abc import ABCMeta, abstractmethod, abstractproperty
+import traceback
 
 pyodbc.pooling = False
 
@@ -34,8 +35,9 @@ class Request:
                 self.request(cursor, params, dto)
             else:
                 raise BaseException
-        except:
+        except Exception as e:
             print("Исключение при обработке запроса : {}".format(type(self).__name__))
+            traceback.print_exc()
             dto.status = "Error"
         finally:
             cursor.close()
