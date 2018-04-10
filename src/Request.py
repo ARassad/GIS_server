@@ -6,15 +6,13 @@ pyodbc.pooling = False
 
 
 def connect_database():
-    server = 'poaskbs.database.windows.net'
-    database = 'kbs'
-    username = 'poas_root'
-    password = 'P0asgovno'
+    server = 'DESKTOP-I3NMTN1\SQLEXPRESS'
+    database = 'GIS'
     driver = '{ODBC Driver 13 for SQL Server}'
-    cnxn = pyodbc.connect('DRIVER={};PORT=1433;SERVER={};PORT=1443;DATABASE={};UID={};PWD={}'.format
-                          (driver, server, database, username, password), autocommit=True)
-    cursor = cnxn.cursor()
-    return cursor, cnxn
+    cnxn = pyodbc.connect('DRIVER={};SERVER={};Trusted_Connection=Yes;DATABASE={}'.format
+                          (driver, server, database), autocommit=True)
+
+    return cnxn.cursor(), cnxn
 
 
 class DataTransferObject:
