@@ -15,7 +15,6 @@ def pointStreet(x, y):
         cursor.execute(
             "SELECT street FROM segmentAddress WHERE firstPoint = '{}' OR secondPoint = '{}'".format(curPoint[2],
                                                                                                      curPoint[2]))
-
         if cursor.fetchone() is not None and mnDist > curDist:
             mnDist = curDist
             mnId = curPoint[2]

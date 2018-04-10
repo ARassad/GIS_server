@@ -22,7 +22,7 @@ class GetResult(Request):
 
     @staticmethod
     def request(cursor, params, dataTransferObject):
-        dataTransferObject.Status = "Error"
+        dataTransferObject.status = "Error"
 
         request = params["request"]
 
@@ -38,8 +38,9 @@ class GetResult(Request):
         for i, curChr in enumerate(request):
             if curChr >= '0'  and curChr <='9':
                 check = 0
-                street = request[:i-2]
+                street = request[:i-1]
                 numstreet = request[i:]
+                break
 
         if check:
             # Поиск точек по названию улицы
@@ -82,7 +83,7 @@ class GetResult(Request):
                     dataTransferObject.typeOrganization.point[cntBuild].y = pt[1]
                     dataTransferObject.typeOrganization.name[cntBuild] = curBuild[1]
                     cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(nms[1]))
-                    curOutputData.street = cursor.fetchone()
+                    dataTransferObject.typeOrganization.street = cursor.fetchone()
                     cntBuild += 1
 
             dataTransferObject.typeOrganization.cntBuild = cntBuild
@@ -91,17 +92,19 @@ class GetResult(Request):
             cursor.execute("SELECT idStreet FROM building WHERE num = '{}'".format(numstreet))
 
             allStreet = cursor.fetchall()
+            dataTransferObject.points = []
 
             for idStreet in allStreet:
-                cursor.execute("SELECT pointId FROM Street WHERE id = '{}' AND name = '{}'".format(idStreet, street))
+                cursor.execute("SELECT pointId FROM Street WHERE id = '{}' AND name = '{}'".format(idStreet[0], street))
 
-                pt = getPointForId(cursor, cursor.fetchone())
+                curPoint = cursor.fetchone()
+
+                pt = getPointForId(cursor, curPoint[0])
 
                 if pt is not None:
-                    dataTransferObject.building.point.x = pt[0]
-                    dataTransferObject.building.point.y = pt[1]
+                    dataTransferObject.points.append((pt[0], pt[1]))
 
-        dataTransferObject.Status = "Ok"
+        dataTransferObject.status = "Ok"
 
         return
 

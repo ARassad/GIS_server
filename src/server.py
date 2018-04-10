@@ -6,6 +6,10 @@ from cgi import parse_multipart
 from urllib.parse import parse_qs
 import json
 from Request import DataTransferObject
+from GetRoute import GetRoute
+from GetAdresse import GetAdresse
+from GetResult import GetResult
+
 
 """
     КАК СДЕЛАТЬ ЗАПРОС
@@ -24,6 +28,9 @@ from Request import DataTransferObject
 
 api_methods_get, api_methods_post = {}, {}
 
+api_methods_get["GetResult"] = GetResult()
+api_methods_get["GetAdresse"] = GetAdresse()
+api_methods_get["GetRoute"] = GetRoute()
 
 class HttpServer(BaseHTTPRequestHandler):
     def _set_headers(self):
