@@ -28,7 +28,7 @@ class GetResult(Request):
             curDist = getDistance(curPoint[0], curPoint[1], x, y)
             if mnDist > curDist:
                 mnDist = curDist
-                mnId = curPoint[3]
+                mnId = curPoint[2]
 
         cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(mnId))
 
