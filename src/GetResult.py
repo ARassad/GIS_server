@@ -2,7 +2,7 @@ from Request import Request
 
 def getPointForId(cursor, id):
     cursor.execute("SELECT x,y FROM point WHERE id = '{}'".format(id))
-    return cursor.fetchone()[0]
+    return cursor.fetchone()
 
 def getOrganization(cursor, id, nameOrg, curOutputData):
     cursor.execute("SELECT pointId,idStreet FROM building WHERE id = '{}'".format(id))
@@ -12,14 +12,13 @@ def getOrganization(cursor, id, nameOrg, curOutputData):
     pt = getPointForId(cursor, nms[0])
 
     if pt is not None:
-        curOutputData.points = pt[0]
-        curOutputData.name = nameOrg
         cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(nms[1]))
-        curOutputData.street = cursor.fetchone()
+        curOutputData.append((nameOrg, cursor.fetchone()[0], pt))
 
 class Organization:
     name = ""
     address = ""
+    point = 0
 
 class GetResult(Request):
 
@@ -59,10 +58,10 @@ class GetResult(Request):
             # Поиск точек по названию компаниии
             cursor.execute("SELECT idBuilding FROM Organization WHERE name = '{}'".format(request))
 
-            id = cursor.fetchone()[0]
-            if id is not None:
-                getOrganization(cursor, id, request, dataTransferObject)
-
+            if cursor.fetchone() is not None:
+                dataTransferObject.Organization = Organization()
+                dataTransferObject.Organization = []
+                getOrganization(cursor, cursor.fetchone(), request, dataTransferObject.Organization)
 
             # Поиск домов по названию типа компании
             cursor.execute("SELECT id FROM typeOrganization WHERE name = '{}'".format(request))
@@ -73,25 +72,8 @@ class GetResult(Request):
 
             allBuild = cursor.fetchall()
 
-            cntBuild = 0
-
             for curBuild in allBuild:
-                cursor.execute("SELECT pointId,idStreet FROM building WHERE id = '{}'".format(curBuild[0]))
-
-                nms = cursor.fetchone()
-
-                pt = getPointForId(cursor, nms[0])
-
-
-                if pt is not None:
-                    dataTransferObject.typeOrganization.point[cntBuild].x = pt[0]
-                    dataTransferObject.typeOrganization.point[cntBuild].y = pt[1]
-                    dataTransferObject.typeOrganization.name[cntBuild] = curBuild[1]
-                    cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(nms[1]))
-                    dataTransferObject.typeOrganization.street = cursor.fetchone()[0]
-                    cntBuild += 1
-
-            dataTransferObject.typeOrganization.cntBuild = cntBuild
+                getOrganization(cursor, curBuild[0], curBuild[1], dataTransferObject.Organization)
 
         else:
             cursor.execute("SELECT idStreet FROM building WHERE num = '{}'".format(numstreet))
