@@ -89,14 +89,15 @@ class GetResult(Request):
 
         else:
             # Поиск точек по названию дома
-            cursor.execute("SELECT idStreet FROM building WHERE num = '{}'".format(numstreet))
+            cursor.execute("SELECT idStreet,pointId FROM building WHERE num = '{}'".format(numstreet))
             allStreet = cursor.fetchall()
-            for idStreet in allStreet:
-                cursor.execute("SELECT pointId FROM Street WHERE id = '{}' AND name = '{}'".format(idStreet[0], street))
+            for curStreet in allStreet:
+                cursor.execute("SELECT pointId FROM Street WHERE id = '{}' AND name = '{}'".format(curStreet[0], street))
                 curPoint = cursor.fetchone()
-                pt = getPointForId(cursor, curPoint[0])
-                if pt is not None:
-                    dataTransferObject.points.append((pt[0], pt[1]))
+                if curPoint is not None:
+                    pt = getPointForId(cursor, curStreet[1])
+                    if pt is not None:
+                        dataTransferObject.points.append((pt[0], pt[1]))
 
         dataTransferObject.status = "Ok"
 
