@@ -12,7 +12,7 @@ def getPointForId(cursor, id):
 
 def getOrganization(cursor, id, nameOrg):
 
-    cursor.execute("SELECT pointId,idStreet FROM building WHERE id = '{}'".format(id))
+    cursor.execute("SELECT pointId,idStreet,num FROM building WHERE id = '{}'".format(id))
 
     nms = cursor.fetchone()
 
@@ -31,7 +31,7 @@ def getOrganization(cursor, id, nameOrg):
     if name1 is None:
         return
 
-    return Organization(nameOrg, name1[0], (pt[0], pt[1]))
+    return Organization(nameOrg, name1[0] + " " + nms[2], (pt[0], pt[1]))
 
 class GetResult(Request):
 
@@ -39,7 +39,7 @@ class GetResult(Request):
     def request(cursor, params, dataTransferObject):
         dataTransferObject.status = "Error"
         dataTransferObject.points = []
-        dataTransferObject.organization = []
+        dataTransferObject.organizations = []
 
         request = params["request"]
 
@@ -66,7 +66,7 @@ class GetResult(Request):
             if ptId is not None:
                 pt = getPointForId(cursor, ptId[0])
                 if pt is not None:
-                    dataTransferObject.points.append((pt[0],pt[1]))
+                    dataTransferObject.points.append((pt[0], pt[1]))
 
             # Поиск точек по названию компаниии
             cursor.execute("SELECT idBuilding FROM Organization WHERE name = '{}'".format(request))
@@ -74,7 +74,7 @@ class GetResult(Request):
             if idBuild is not None:
                 curObjectBuild = getOrganization(cursor, idBuild[0], request)
                 if curObjectBuild is not None:
-                    dataTransferObject.organization.append(curObjectBuild[0])
+                    dataTransferObject.organizations.append(curObjectBuild)
 
             # Поиск точек по названию типа компании
             cursor.execute("SELECT id FROM typeOrganization WHERE name = '{}'".format(request))
@@ -83,9 +83,9 @@ class GetResult(Request):
                 cursor.execute("SELECT idBuilding, name FROM Organization WHERE idType = '{}'".format(id[0]))
                 allBuild = cursor.fetchall()
                 for curBuild in allBuild:
-                    curObjectBuild = getOrganization(cursor, idBuild[0], curBuild[1])
+                    curObjectBuild = getOrganization(cursor, curBuild[0], curBuild[1])
                     if curObjectBuild is not None:
-                        dataTransferObject.organization.append(curObjectBuild)
+                        dataTransferObject.organizations.append(curObjectBuild)
 
         else:
             # Поиск точек по названию дома
