@@ -10,9 +10,9 @@ def getPointForId(cursor, id):
     cursor.execute("SELECT x,y FROM point WHERE id = '{}'".format(id))
     return cursor.fetchone()
 
-def getOrganization(cursor, id, nameOrg):
+def getOrganization(cursor, idBuilding, nameOrg):
 
-    cursor.execute("SELECT pointId,idStreet,num FROM building WHERE id = '{}'".format(id))
+    cursor.execute("SELECT pointId,idStreet,num FROM building WHERE id = '{}'".format(idBuilding))
 
     nms = cursor.fetchone()
 
@@ -99,6 +99,6 @@ class GetResult(Request):
                     if pt is not None:
                         dataTransferObject.points.append((pt[0], pt[1]))
 
-        dataTransferObject.status = "Ok"
+        dataTransferObject.status = "OK"
 
         return

@@ -1,8 +1,8 @@
 from Request import Request
-from GetAdresse import getDistance
+from GetAddresse import getDistance
 
 
-def pointStreet(x, y):
+def pointStreet(cursor, x, y):
     cursor.execute("SELECT x,y,id FROM point".format(id))
 
     allPoint = cursor.fetchall()
@@ -61,3 +61,4 @@ class GetRoute(Request):
         dataTransferObject.points[cnt + 1].x = x2
         dataTransferObject.points[cnt + 1].y = y2
         dataTransferObject.cnt = cnt + 2
+        dataTransferObject.Status = "OK"
