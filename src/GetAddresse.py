@@ -11,8 +11,8 @@ class GetAddresse(Request):
         dataTransferObject.status = "Error"
         dataTransferObject.organizations = []
         dataTransferObject.address = ""
-        x = params["coordinateX"]
-        y = params["coordinateY"]
+        x = int(params["coordinateX"])
+        y = int(params["coordinateY"])
 
         if x is None or y is None:
             dataTransferObject.message = "Пустой запрос строки"
@@ -31,8 +31,7 @@ class GetAddresse(Request):
                 mnDist = curDist
                 mnId = curPoint[2]
 
-        cursor.execute("SELECT idStreet FROM segmentStreet WHERE idFirstPoint = '{}' OR idSecondPoint= '{}'".
-                       format(mnId, mnId))
+        cursor.execute("SELECT idStreet FROM segmentStreet WHERE idFirstPoint = '{}' OR idSecondPoint= '{}'".format(mnId, mnId))
 
         idStreet = cursor.fetchone()
 

@@ -7,7 +7,7 @@ from urllib.parse import parse_qs
 import json
 from Request import DataTransferObject
 from GetRoute import GetRoute
-from GetAdresse import GetAdresse
+from GetAddresse import GetAddresse
 from GetResult import GetResult
 
 
@@ -29,7 +29,7 @@ from GetResult import GetResult
 api_methods_get, api_methods_post = {}, {}
 
 api_methods_get["GetResult"] = GetResult()
-api_methods_get["GetAdresse"] = GetAdresse()
+api_methods_get["GetAddresse"] = GetAddresse()
 api_methods_get["GetRoute"] = GetRoute()
 
 class HttpServer(BaseHTTPRequestHandler):

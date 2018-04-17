@@ -3,7 +3,7 @@ from GetAddresse import getDistance
 
 
 def pointStreet(cursor, x, y):
-    cursor.execute("SELECT x,y,id FROM point".format(id))
+    cursor.execute("SELECT x,y,id FROM point")
 
     allPoint = cursor.fetchall()
 
@@ -13,8 +13,8 @@ def pointStreet(cursor, x, y):
     for curPoint in allPoint:
         curDist = getDistance(curPoint[0], curPoint[1], x, y)
         cursor.execute(
-            "SELECT street FROM segmentAddress WHERE firstPoint = '{}' OR secondPoint = '{}'".format(curPoint[2],
-                                                                                                     curPoint[2]))
+            "SELECT idStreet FROM segmentAddress WHERE idFirstPoint = '{}' OR idSecondPoint = '{}'".format(curPoint[2],
+                                                                                                        curPoint[2]))
         if cursor.fetchone() is not None and mnDist > curDist:
             mnDist = curDist
             mnId = curPoint[2]
@@ -25,8 +25,8 @@ class GetRoute(Request):
 
     @staticmethod
     def request(cursor, params, dataTransferObject):
-        dataTransferObject.Status = "Error"
-
+        dataTransferObject.status = "Error"
+        dataTransferObject.points = []
         x1 = params["coordinateX1"]
         y1 = params["coordinateY1"]
 
@@ -37,13 +37,17 @@ class GetRoute(Request):
             dataTransferObject.message = "Пустой запрос строки"
             raise AttributeError
 
-        dataTransferObject.points[0].x = x1
-        dataTransferObject.points[0].y = y1
+        dataTransferObject.points.append((x1, y1))
 
         cursor.execute("SELECT id FROM Track WHERE idVertex1 = '{}' AND idVertex2 = '{}'".format(pointStreet(x1, y1),
                                                                                              pointStreet(x2, y2)))
+        curEdge = cursor.fetchone()
 
-        cursor.execute("SELECT idVertex FROM VertexTrack WHERE idTrack = '{}'".format(cursor.fetchone()))
+        if curEdge is None:
+            dataTransferObject.message = "Данный путь не построен, обратитесь к системному администратору"
+            return AttributeError
+
+        cursor.execute("SELECT idVertex FROM VertexTrack WHERE idTrack = '{}'".format(curEdge))
 
         allPoint = cursor.fetchall()
 
@@ -52,13 +56,12 @@ class GetRoute(Request):
 
             pt = cursor.fetchone()
 
-            if pt is not None:
-                dataTransferObject.points[i + 1].x = pt[0]
-                dataTransferObject.points[i + 1].y = pt[1]
+            if pt is None:
+                dataTransferObject.message = \
+                    "При построении пути не была найдена точка с идентификатором: {}".format(id)
+                return AttributeError
 
-        cnt = len(allPoint)
+            dataTransferObject.points.append(pt[0], pt[1])
 
-        dataTransferObject.points[cnt + 1].x = x2
-        dataTransferObject.points[cnt + 1].y = y2
-        dataTransferObject.cnt = cnt + 2
-        dataTransferObject.Status = "OK"
+        dataTransferObject.points.append((x2, y2))
+        dataTransferObject.status = "OK"
