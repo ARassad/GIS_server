@@ -35,6 +35,13 @@ class GetAddresse(Request):
 
         idStreet = cursor.fetchone()
 
+        cursor.execute("SELECT id FROM Street WHERE pointId = '{}'"
+                       .format(mnId))
+
+        idStreet2 = cursor.fetchone()
+
+        if idStreet is None:
+            idStreet = idStreet2
         if idStreet is not None:
             cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(idStreet[0]))
             curStreet = cursor.fetchone()
@@ -44,11 +51,22 @@ class GetAddresse(Request):
         else:
 
             cursor.execute(
-                "SELECT id FROM building WHERE pointId = '{}'".format(mnId, mnId))
+                "SELECT id,num,idStreet FROM building WHERE pointId = '{}'".format(mnId, mnId))
 
             idBuilding = cursor.fetchone()
             if idBuilding is not None:
+                cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(idBuilding[2]))
+
+                nameStreet = cursor.fetchone()
+
+                if nameStreet is None:
+                    dataTransferObject.message = "Не найдена улица дома"
+                    raise AttributeError
+
+                dataTransferObject.address = nameStreet[0] + " " + idBuilding[1]
+
                 cursor.execute("SELECT name FROM Organization WHERE idBuilding = '{}'".format(idBuilding[0]))
+
                 allOrg = cursor.fetchall()
 
                 for curNameOrg in allOrg:
