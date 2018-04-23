@@ -2,7 +2,7 @@ from Request import Request
 from GetResult import getOrganization
 
 def getDistance(x1, y1, x2, y2):
-    return (x2-x1)**2+(y2-y1)**2
+    return ((int)(x2)-(int)(x1))**2+((int)(y2)-(int)(y1))**2
 
 class GetAddresse(Request):
     @staticmethod

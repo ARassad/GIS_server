@@ -9,7 +9,8 @@ from Request import DataTransferObject
 from GetRoute import GetRoute
 from GetAddresse import GetAddresse
 from GetResult import GetResult
-
+from GetSegment import GetSegment
+from SetSegment import SetSegment
 
 """
     КАК СДЕЛАТЬ ЗАПРОС
@@ -31,6 +32,8 @@ api_methods_get, api_methods_post = {}, {}
 api_methods_get["GetResult"] = GetResult()
 api_methods_get["GetAddresse"] = GetAddresse()
 api_methods_get["GetRoute"] = GetRoute()
+api_methods_get["GetSegment"] = GetSegment()
+api_methods_get["SetSegment"] = SetSegment()
 
 class HttpServer(BaseHTTPRequestHandler):
     def _set_headers(self):
