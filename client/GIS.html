@@ -66,7 +66,9 @@
 	   h2{
 		align : center;
 	   }
-	   
+	   .one-addresse-info{
+		background-color : white;
+	   }
 	</style>
 		
 	
@@ -219,7 +221,7 @@
 		
 		function addOneAddresseInfo( strAddr){
 			var addrElem = $(" \
-				<div class = 'one-addresse-info' >" + 
+				<div class = 'one-addresse-info card card-body' >" + 
 					strAddr + 
 				"</div> \
 			");
@@ -240,7 +242,7 @@
 		//Добавить в список организаций (менюшка слева) Ещё одна строчка
 		function addOneOrganizationInfo( organization ){
 			var orgInfoElement = $(" \
-					<div class = 'one-organization-info'> \
+					<div class = 'one-organization-info card card-body'> \
 						" + organization.name + " <br> \
 						" + organization.address + " <br> \
 					</div> \
@@ -370,14 +372,15 @@
 				minY = Math.min(minY, points[i][1]);
 			}
 			
-			centrX = (minX + maxX) / 2 + jq_mapIconContainer.offset().left;
-			centrY = (minY + maxY) / 2 + jq_mapIconContainer.offset().top;
+			centrX = (minX + maxX) / 2 ; //+ jq_mapIconContainer.offset().left;
+			centrY = (minY + maxY) / 2 ; //+ jq_mapIconContainer.offset().top;
 			
 			//TODO тестыыыыыы
 			scrollTo(centrX, centrY);
 
 			var orgs = data.organizations;
-
+			if (orgs.length > 0)
+				showOrganizationsInfo();
 			refillOrganizationsInfo(orgs);
 		}
 		
@@ -640,21 +643,32 @@
 			var centerPoint = null;
 			if (!oldCenterPoint.length || oldCenterPoint.length == 0){
 				centerPoint = $("<div class='window-center-point' id = 'window-center-point'></div>")
-				$(document.body).append(centerPoint);
+				//$(document.body).append(centerPoint);
+				jq_mapIconContainer.append(centerPoint);
 				centerPoint.hide();
 			}
 			else{
 				centerPoint = oldCenterPoint;
 			}
+			y = parseInt(y);
+			x = parseInt(x);
+			let newOffset = {
+				top : y,
+				left : x
+			};
+			centerPoint[0].offsetTop =parseInt(y);
+			centerPoint[0].offsetLeft = parseInt(x);
 			
-			centerPoint.offset({top:y, left:x});
+			centerPoint.offset(newOffset);
 			
 			// анимируем скроллинг к элементу centerPoint
 			$('html, body').animate(
 				{ 
-					scrollTop: centerPoint.offset().top, 	//Позиция по вертикали
-					scrollLeft: centerPoint.offset().left
-				}, //Позиция по горизонтали
+					//scrollTop: centerPoint.offset().top, 	//Позиция по вертикали
+					//scrollLeft: centerPoint.offset().left 
+					scrollTop: y, 	//Позиция по вертикали
+					scrollLeft: x //Позиция по горизонтали
+				}, 
 				500										//Скорость
 			); 
 		};
