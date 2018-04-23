@@ -5,7 +5,6 @@ def getDistance(x1, y1, x2, y2):
     return (x2-x1)**2+(y2-y1)**2
 
 class GetAddresse(Request):
-
     @staticmethod
     def request(cursor, params, dataTransferObject):
         dataTransferObject.status = "Error"
@@ -31,23 +30,30 @@ class GetAddresse(Request):
                 mnDist = curDist
                 mnId = curPoint[2]
 
-        cursor.execute("SELECT idStreet FROM segmentStreet WHERE idFirstPoint = '{}' OR idSecondPoint= '{}'".format(mnId, mnId))
+        cursor.execute("SELECT idStreet FROM segmentStreet WHERE idFirstPoint = '{}' OR idSecondPoint= '{}'"
+                       .format(mnId, mnId))
 
         idStreet = cursor.fetchone()
 
         if idStreet is not None:
-            cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(idStreet))
+            cursor.execute("SELECT name FROM Street WHERE id = '{}'".format(idStreet[0]))
             curStreet = cursor.fetchone()
             if curStreet is not None:
                 dataTransferObject.address = curStreet[0]
 
         else:
-            cursor.execute("SELECT name FROM Organization WHERE idBuilding = '{}'".format(mnId))
-            allOrg = cursor.fetchall()
 
-            for curNameOrg in allOrg:
-                curOrg = getOrganization(cursor, curNameOrg, mnId)
-                if curOrg is not None:
-                    dataTransferObject.organizations.append(curOrg)
+            cursor.execute(
+                "SELECT id FROM building WHERE pointId = '{}'".format(mnId, mnId))
+
+            idBuilding = cursor.fetchone()
+            if idBuilding is not None:
+                cursor.execute("SELECT name FROM Organization WHERE idBuilding = '{}'".format(idBuilding[0]))
+                allOrg = cursor.fetchall()
+
+                for curNameOrg in allOrg:
+                    curOrg = getOrganization(cursor, idBuilding[0], curNameOrg[0])
+                    if curOrg is not None:
+                        dataTransferObject.organizations.append(curOrg)
 
         dataTransferObject.status = "OK"
