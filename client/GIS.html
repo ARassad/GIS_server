@@ -63,6 +63,10 @@
 	   
 	   }
 	   
+	   h2{
+		align : center;
+	   }
+	   
 	</style>
 		
 	
@@ -96,8 +100,8 @@
 		</div>
 	</div>
 	
-	<div id = "search-menu">
-		<form>	
+	<div >
+		<form id = "search-menu" action="javascript:">	
 			<div class = "search-menu form-row row">
 				<input class="form-control col-md-10 col-9" type="text" id = "search-row"/>
 				<input class="form-control col-md-2  col-3" type="submit" value="Искать" />
@@ -114,13 +118,13 @@
 	
 	<div class = "left-info" id = "left-info">	
 		<div class = "addresses-info" id = "addresses-info">
-		<h2>Список адресов</h2>
+		<h2>Адрес</h2>
 		</div>
 		<div class = "organizations-info" id = "organizations-info">
 		<h2>Список организаций</h2>
 		</div>
 		<div class = "way-info" id = "way-info">
-			<h2>Это ГИС-ПОАС и мы строим высотку</h2>
+			<h2>Маршрут</h2>
 			<form>
 				<label> Откуда	</label>
 				<label class="form-control" id="way-info-first-point" type="text"> </label>
@@ -147,7 +151,8 @@
 
 
 			//Адрес сервака, возможно, будет ненужным
-			serverAddr = "localhost://"
+			//serverAddr = "http://192.168.88.27/api"
+			serverAddr = "http://25.62.221.106/api"
 		
 			//Jquery - объект с картинкой карты
 			jq_mapImg = $("#map-image");	
@@ -202,6 +207,8 @@
 			
 			//Последний клик по карте
 			lastClickXY = [-1, -1];
+
+			wayPoints = [];
 		});
 		
 			
@@ -323,17 +330,18 @@
 		///////////////////////////////////////////////////////
 		
 		function onSearchSubmit(event){
-			alert("Попробуйте сначала найти себя");
+			//alert("Попробуйте сначала найти себя");
 			serverRequestSearchLoc();
 		}
 		
 		// Это запрос на сервак 
 		function serverRequestSearchLoc(){
 			var searchStr = jq_searchRow.val();
-			var requestURL = "search/";
+			let requestURL = "GetResult";
 			$.get(
-					requestURL,
+					serverAddr,
 					{
+						method: requestURL,
 						request: searchStr
 					},
 					onServerSearchAnswer,
@@ -343,12 +351,17 @@
 
 		//Это обработка ответа
 		function onServerSearchAnswer(data, textStatus, jqXHR){
-			var points = data.points;
+			let points = [];
+			points = points.concat( data.points);
+			for (let i = 0; i < data.organizations.length; i++ ){
+				points = points.concat( [data.organizations[i].point]);
+			}
+
 			removeAllPointIcons();
-			var minX, minY, maxX, maxY;
-			maxX = maxY = 10000000000;
-			minY = minY = 0;
-			for ( var i = 0; i < points.length; i++){
+			let minX, minY, maxX, maxY;
+			minX = minY = 10000000000;
+			maxX = maxY = 0;
+			for ( let i = 0; i < points.length; i++){
 				addBlackPointIcon( points[i]); //Фигачим точечки
 				
 				maxX = Math.max(maxX, points[i][0]);
@@ -388,14 +401,15 @@
 			var x = xy[0];
 			var y = xy[1];
 			
-			var requestURL = "GetAddress/"; 
+			var requestURL = "GetAddresse"; 
 			$.get(
-					requestURL,
+					serverAddr,
 					{
+						method: requestURL,
 						coordinateX: xy[0],
 						coordinateY: xy[1]
 					}, 					
-					onWhatThereRequest,
+					onWhatAddressThereAnswer,
 					"Json"
 			);
 		};
@@ -403,7 +417,8 @@
 
 		//Обработка ответа
 		function onWhatAddressThereAnswer(data, textStatus, jqXHR){
-			var addr = data.object.address;
+			//var addr = data.object.address ? data.object.address : "";
+			var addr = data.address;
 			if ( getFirstWayPointToWayInfo() == null || getFirstWayPointToWayInfo() == ""){
 				setFirstWayPointToWayInfo(addr);
 			} else if ( getSecondWayPointToWayInfo() == null || getSecondWayPointToWayInfo() == ""){
@@ -423,32 +438,43 @@
 			var x = xy[0];
 			var y = xy[1];
 			
-			var requestURL = "GetAddress/"; 
+			var requestURL = "GetAddresse"; 
 			$.get(
-					requestURL,
+					serverAddr,
 					{
+						method: requestURL,
 						coordinateX: xy[0],
 						coordinateY: xy[1]
 					}, 					
-					onWhatThereRequest,
+					onWhatOrganizationsThere,
 					"Json"
 			);
 		};
 
 		function onWhatOrganizationsThere(data, textStatus, jqXHR){
 			var organizations = data.organizations;
-			refillOrganizationsInfo(organizations);
+			if (organizations.length >= 1){
+				showOrganizationsInfo();
+				refillOrganizationsInfo(organizations);
+			}else {
+				const addr = data.address;
+				clearAddressesInfo();
+				addOneAddresseInfo(addr);
+				showAddressesInfo();
+			}
+			
 		}
 
 
 		function getWayRequest(){
-			var requestURL = "GetRoute/";
+			var requestURL = "GetRoute";
 			
-			pointsOnMap = jq_mapIconContainer.find(".point-icon");
+			pointsOnMap = getWayPointIcons();
 			
-			$.post(
-				requestURL,
+			$.get(
+				serverAddr,
 				{
+					method: requestURL,
 					coordinateX1 : pointsOnMap[0].coordX,
 					coordinateY1 : pointsOnMap[0].coordY,
 					coordinateX2 : pointsOnMap[1].coordX,
@@ -478,7 +504,7 @@
 		function drawWay( way){
 			canv.beginPath();
 			canv.moveTo( way[0][0], way[0][1] );
-			for ( var i = 1; i < way.lenght; i++){
+			for ( var i = 1; i < way.length; i++){
 				canv.lineTo( way[i][0], way[i][1] );
 			};
 			canv.stroke();
@@ -486,7 +512,7 @@
 		
 		//Очистить карту от путей
 		function clearMapCanvas(){
-			canv.clearRect(0, 0, canv.width, canvas.canv);
+			canv.clearRect(0, 0, canv.width, canv.canv);
 		};
 		
 		
@@ -514,13 +540,20 @@
 					removeWayPointIcons();
 
 				convertPointToWayPoint( $(".point-icon"));
+				
+				//let point = getRedPointIcons()[0];
+				whatAddressThere(lastClickXY);
+
 
 			} else if (selectedIndex == 1){
 
-				showAddressesInfo();
 				removeWayPointIcons();
 				setFirstWayPointToWayInfo("");
 				setSecondWayPointToWayInfo("");				
+
+				let point = getRedPointIcons()[0];
+
+				whatOrganizationsThere(lastClickXY);
 			}
 
 			hidePointMenu();
@@ -546,6 +579,17 @@
 			return iconElement;
 		};
 		
+		function getPointIcons(){
+			return $(".point-icon");
+		}
+
+		
+		function getRedPointIcons(){
+			return $(".red-point");
+		}
+
+		
+		
 		function addRedPointIcon(xy){
 			var redIconSource = "./redPointIcon.png";
 			var pointElem = addPointIcon(redIconSource,xy);
@@ -561,16 +605,27 @@
 		};
 		
 		function convertPointToWayPoint(jq_point){
+
 			jq_point.removeClass("point-icon");
 			jq_point.addClass("way-point-icon");
+			
 		}
 
+		function getWayPointIcons(){
+			return $(".way-point-icon");
+		}
+
+		function removeAllPointIcons(){
+			removeNotWayPointIcons();
+			removeWayPointIcons();
+		}
 
 		function removeNotWayPointIcons(){
 			jq_mapIconContainer.find(".point-icon").remove();
 		};
 
 		function removeWayPointIcons(){
+			
 			var jq_notWayPoint = jq_mapIconContainer.find(".point-icon");
 			var notWayPointOffsets = jq_notWayPoint.offset(); //Костыль, иначе - почему-то съезжают
 			jq_mapIconContainer.find(".way-point-icon").remove();
@@ -581,9 +636,9 @@
 		///////////////////////////////////////////
 		
 		function scrollTo(x,y){
-			var oldCenterPoint = $(".window-center-point");
+			var oldCenterPoint = $("#window-center-point");
 			var centerPoint = null;
-			if (oldCenterPoint.lenght == 0){
+			if (!oldCenterPoint.length || oldCenterPoint.length == 0){
 				centerPoint = $("<div class='window-center-point' id = 'window-center-point'></div>")
 				$(document.body).append(centerPoint);
 				centerPoint.hide();
