@@ -11,6 +11,7 @@ from GetAddresse import GetAddresse
 from GetResult import GetResult
 from GetSegment import GetSegment
 from SetSegment import SetSegment
+from GetAllWayPoints import GetAllWayPoints
 
 """
     КАК СДЕЛАТЬ ЗАПРОС
@@ -34,6 +35,7 @@ api_methods_get["GetAddresse"] = GetAddresse()
 api_methods_get["GetRoute"] = GetRoute()
 api_methods_get["GetSegment"] = GetSegment()
 api_methods_get["SetSegment"] = SetSegment()
+api_methods_get["getAllWayPoints"] = GetAllWayPoints()
 
 class HttpServer(BaseHTTPRequestHandler):
     def _set_headers(self):
