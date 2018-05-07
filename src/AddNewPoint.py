@@ -12,7 +12,7 @@ class AddNewPoint(Request):
         cursor.execute("select id from Street where name='{}'".format(params['streetName']))
         id_street = cursor.fetchone()
         if id_street is None:
-            cursor.execute("insert into Street(name, pointId) OUTPUT INSERTED.id values('{}', {}})"
+            cursor.execute("insert into Street(name, pointId) OUTPUT INSERTED.id values('{}', {})"
                            .format(params['streetName'], id_new))
             id_street = cursor.fetchone()[0]
 
