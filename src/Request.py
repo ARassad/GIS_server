@@ -7,7 +7,7 @@ pyodbc.pooling = False
 
 
 def connect_database():
-    server = 'DESKTOP-I3NMTN1\SQLEXPRESS'
+    server = 'MSI'
     database = 'GIS'
     driver = '{ODBC Driver 13 for SQL Server}'
     cnxn = pyodbc.connect('DRIVER={};SERVER={};Trusted_Connection=Yes;DATABASE={}'.format

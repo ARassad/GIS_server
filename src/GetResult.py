@@ -53,7 +53,7 @@ class GetResult(Request):
         numstreet = 0
 
         for i, curChr in enumerate(request):
-            if curChr >= '0' and curChr <= '9':
+            if '0' <= curChr <= '9':
                 check = 0
                 street = request[:i-1]
                 numstreet = request[i:]
@@ -89,7 +89,7 @@ class GetResult(Request):
 
         else:
             # Поиск точек по названию дома
-            cursor.execute("SELECT idStreet,pointId FROM building WHERE num = '{}'".format(numstreet))
+            cursor.execute("SELECT idStreet,pointId,id FROM building WHERE num = '{}'".format(numstreet))
             allStreet = cursor.fetchall()
             for curStreet in allStreet:
                 cursor.execute("SELECT pointId FROM Street WHERE id = '{}' AND name = '{}'".format(curStreet[0], street))
@@ -98,6 +98,12 @@ class GetResult(Request):
                     pt = getPointForId(cursor, curStreet[1])
                     if pt is not None:
                         dataTransferObject.points.append((pt[0], pt[1]))
+                    cursor.execute("SELECT name FROM Organization WHERE idBuilding = {}".format(curStreet[2]))
+                    orgs = cursor.fetchall()
+                    if orgs is not None:
+                        dataTransferObject.organizations = list()
+                        for o in orgs:
+                            dataTransferObject.organizations.append(Organization(o[0], request, [pt[0], pt[1]]))
 
         dataTransferObject.status = "OK"
 
