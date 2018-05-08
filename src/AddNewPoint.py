@@ -16,6 +16,8 @@ class AddNewPoint(Request):
                            .format(params['streetName'], id_new))
             id_street = cursor.fetchone()[0]
 
-        cursor.execute("insert into segmentStreet(firstPoint, secondPoint, street) values({}, {}, {})"
+        cursor.execute("insert into segmentStreet(idFirstPoint, idSecondPoint, isStreet) values({}, {}, {})"
                        .format(params['oldId'], id_new, id_street))
         dataTransferObject.status = "OK"
+
+
