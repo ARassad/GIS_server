@@ -37,8 +37,9 @@ class GetRoute(Request):
 
         dataTransferObject.points.append((x1, y1))
 
-        cursor.execute("SELECT id FROM Track WHERE idVertex1 = '{}' AND idVertex2 = '{}'".format(pointStreet(cursor, x1, y1),
-                                                                                             pointStreet(cursor, x2, y2)))
+        f = pointStreet(cursor, x1, y1)
+        t = pointStreet(cursor, x2, y2)
+        cursor.execute("SELECT id FROM Track WHERE idVertex1={} AND idVertex2={}".format(f, t))
         curEdge = cursor.fetchone()
 
         if curEdge is None:
