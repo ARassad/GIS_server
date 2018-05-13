@@ -25,7 +25,7 @@ typedef long double ld;
 #define all(x) x.begin(),x.end()
 #define rall(x) x.rbegin(),x.rend()
 
-const int MAX = 15;
+const int MAX = 515;
 ld dp[MAX][MAX];
 int p[MAX][MAX];
 int toId[MAX];
