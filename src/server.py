@@ -39,7 +39,7 @@ api_methods_get["GetSegment"] = GetSegment()
 api_methods_get["SetSegment"] = SetSegment()
 api_methods_get["getAllWayPoints"] = GetAllWayPoints()
 api_methods_get["addNewPoint"] = AddNewPoint()
-api_methods_get["Authorization"] = AddNewPoint()
+api_methods_get["Authorization"] = Authorization()
 
 
 class HttpServer(BaseHTTPRequestHandler):
@@ -107,7 +107,7 @@ class HttpServer(BaseHTTPRequestHandler):
         self.wfile.write(str.encode(obj.toJSON()))
 
 
-def run_httpserver(server_class=HTTPServer, handler_class=HttpServer, port=80):
+def run_httpserver(server_class=HTTPServer, handler_class=HttpServer, port=443):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     print('Start')
