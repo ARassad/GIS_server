@@ -13,6 +13,7 @@ from GetSegment import GetSegment
 from SetSegment import SetSegment
 from GetAllWayPoints import GetAllWayPoints
 from AddNewPoint import AddNewPoint
+from Authorization import Authorization
 import calculateTracks
 """
     КАК СДЕЛАТЬ ЗАПРОС
@@ -38,6 +39,7 @@ api_methods_get["GetSegment"] = GetSegment()
 api_methods_get["SetSegment"] = SetSegment()
 api_methods_get["getAllWayPoints"] = GetAllWayPoints()
 api_methods_get["addNewPoint"] = AddNewPoint()
+api_methods_get["Authorization"] = AddNewPoint()
 
 
 class HttpServer(BaseHTTPRequestHandler):
