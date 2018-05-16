@@ -11,7 +11,7 @@ class GetSegment(Request):
     @staticmethod
     def request(cursor, params, dataTransferObject):
         dataTransferObject.status = "Error"
-        cursor.execute("select idFirstPoint,idSecondPoint from segmentStreet".format())
+        cursor.execute("select idFirstPoint,idSecondPoint from segmentStreet")
         f = open('segment.txt', 'w+')
         allSegment = cursor.fetchall()
 

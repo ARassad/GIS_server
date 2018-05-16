@@ -15,8 +15,8 @@ class SetSegment(Request):
         for i, line in enumerate(f):
             arr = line.split(" ")
             cursor.execute(
-                "insert into Track(idVertex1, idVertex2) values('{}','{}')".format(arr[0], arr[1]))
-            id_track = cursor.lastrowid
+                "insert into Track(idVertex1, idVertex2) OUTPUT INSERTED.id values('{}','{}')".format(arr[0], arr[1]))
+            id_track = cursor.fetchone()[0]
 
             for j in range(3, (int)(arr[2])+3):
 

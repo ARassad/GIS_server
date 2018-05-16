@@ -2,16 +2,16 @@ import sqlite3
 import json
 from abc import ABCMeta, abstractmethod, abstractproperty
 import traceback
-
+import pyodbc
 
 def connect_database():
-    try:
-        # isolation_level=None == autocommit=True in MySQL
-        conn = sqlite3.connect('GIS_sqlite', isolation_level=None)
-    except sqlite3.Error as e:
-        print(e)
-    finally:
-        return conn.cursor(), conn
+    server = 'MSI'
+    database = 'GIS'
+    driver = '{ODBC Driver 13 for SQL Server}'
+    cnxn = pyodbc.connect('DRIVER={};SERVER={};Trusted_Connection=Yes;DATABASE={}'.format(driver, server, database), autocommit=True)
+
+
+    return cnxn.cursor(), cnxn
 
 
 class DataTransferObject:
