@@ -14,6 +14,7 @@ from SetSegment import SetSegment
 from GetAllWayPoints import GetAllWayPoints
 from AddNewPoint import AddNewPoint
 from Authorization import Authorization
+from AddNewLink import AddNewLink
 import calculateTracks
 """
     КАК СДЕЛАТЬ ЗАПРОС
@@ -40,6 +41,7 @@ api_methods_get["SetSegment"] = SetSegment()
 api_methods_get["getAllWayPoints"] = GetAllWayPoints()
 api_methods_get["addNewPoint"] = AddNewPoint()
 api_methods_get["Authorization"] = Authorization()
+api_methods_get["addNewLink"] = AddNewLink()
 
 
 class HttpServer(BaseHTTPRequestHandler):
@@ -61,7 +63,7 @@ class HttpServer(BaseHTTPRequestHandler):
             value = api_methods_get[mymethod](dct)
             self.wfile.write(str.encode(value))
             print(value)
-            if (mymethod == 'addNewPoint'):
+            if mymethod == 'addNewPoint':
                 calculateTracks.update()
         else:
             print("method cannot parse (None value)")
