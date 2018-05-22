@@ -67,7 +67,7 @@ class HttpServer(BaseHTTPRequestHandler):
             value = api_methods_get[mymethod](dct)
             self.wfile.write(str.encode(value))
             print(value)
-            if mymethod == 'addNewPoint':
+            if mymethod == 'addNewPoint' or mymethod == 'addNewLink':
                 calculateTracks.update()
         else:
             print("method cannot parse (None value)")
