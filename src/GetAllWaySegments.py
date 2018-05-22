@@ -10,9 +10,9 @@ class GetAllWaySegments(Request):
 
         dataTransferObject.segments = []
         for p in points:
-            cursor.execute("select * from point where id={}".format(p[1]))
+            cursor.execute("select * from point where id={}".format(p[0]))
             data1 = cursor.fetchone()
-            cursor.execute("select * from point where id={}".format(p[2]))
+            cursor.execute("select * from point where id={}".format(p[1]))
             data2 = cursor.fetchone()
             dataTransferObject.segments.append({'p1': {'x': data1[1], 'y': data1[2]}, 'p2': {'x': data2[1],
                                                                                              'y': data2[2]}})
